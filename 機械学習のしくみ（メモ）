@@ -40,7 +40,17 @@
   6.糖尿病の進行状況：load_diabetes()
   7.乳がんの陰性/陽性：load_breast_cancer()
 
+・アヤメのデータセット
+　1.data：学習用データ
+　2.feature_names：特徴量の名前
+  3.target：目的の値（分類の値）
+　4.target_names：目的の名前（分類の名前）
+　5.DESCR：このデータセットの説明（）
 
+・3つの品種
+　1.setosa：セトサ（ヒオウギアヤメ）、北海道やアラスカに分布
+  2.versicolor：バージカラー、アメリカ東部やカナダ東部に分布
+  3.virginica：バージ二カ、アメリカ南東部に分布
 
 
 
