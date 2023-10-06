@@ -52,13 +52,45 @@
   2.versicolor：バージカラー、アメリカ東部やカナダ東部に分布
   3.virginica：バージ二カ、アメリカ南東部に分布
 
+・サンプルデータの自動生成
+　1.分類用データセット（塊）：make_blobs(パラメータ)
+　2.分類用データセット（三日月）：make_moons(パラメータ)
+　3.分類用データセット（二重円）：make_circles(パラメータ)
+  4.分類用データセット（同心円）：make_gaussian_quantiles(パラメータ)
+　5.回帰用データセット：make_regression(パラメータ)
+  　※特徴量がXに、その分類（目的変数）がyに返ってくる
 
+・分類用データセット（塊）のパラメータ
+  1.random_state：ランダム生成の種にする番号
+  2.n_samples：データの個数
+  3.n_features：特徴量の数
+  4.centers：塊の数
+  5.cluster_std：ばらつきの大きさ（標準偏差）
 
+・分類用データセット（三日月）のパラメータ
+  1.random_state：ランダム生成の種にする番号
+  2.n_samples：データの個数
+  3.noise：ノイズ
 
+・分類用データセット（二重円）のパラメータ
+  1.random_state：ランダム生成の種にする番号
+  2.n_samples：データの個数
+  3.noise：ノイズ
 
+・分類用データセット（同心円）のパラメータ
+  1.random_state：ランダム生成の種にする番号
+  2.n_samples：データの個数
+  3.n_features：特徴量の数
+  4.n_classes：グループの数
 
+・回帰用データセットのパラメータ
+  1.random_state：ランダム生成の種にする番号
+  2.n_samples：データの個数
+  3.n_features：特徴量の数
+  4.noise：ノイズ
+  5.bias：y切片
 
-
+第3章
 
 
 
