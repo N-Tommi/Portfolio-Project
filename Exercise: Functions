@@ -1,1 +1,44 @@
+2023/10/08
+●Question 1
+def get_expected_cost(beds, baths):
+    value = 80000 + 30000 * beds + 10000 * baths
+    return value
+
+●Question 2
+option_one = get_expected_cost(2, 3)
+option_two = get_expected_cost(3, 2)
+option_three = get_expected_cost(3, 3)
+option_four = get_expected_cost(3, 4)
+
+print(option_one)
+print(option_two)
+print(option_three)
+print(option_four)
+
+●Question 3
+def get_cost(sqft_walls, sqft_ceiling, sqft_per_gallon, cost_per_gallon):
+    total_sqft = sqft_walls + sqft_ceiling
+    gallons_needed = total_sqft / sqft_per_gallon
+    cost = cost_per_gallon * gallons_needed
+    return cost
+
+●Question 4
+project_cost = get_cost(432, 144, 400, 15)
+
+●Question 5
+def get_actual_cost(sqft_walls, sqft_ceiling, sqft_per_gallon, cost_per_gallon):
+    total_sqft = sqft_walls + sqft_ceiling
+    gallons_needed = total_sqft / sqft_per_gallon
+    gallons_to_buy = math.ceil(gallons_needed)
+    cost = cost_per_gallon * gallons_to_buy
+    return cost
+
+
+
+
+
+
+
+
+
 
