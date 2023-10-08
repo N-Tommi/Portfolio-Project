@@ -14,4 +14,45 @@ def get_grade(score):
     return grade
 
 ●Question 2
+def cost_of_project(engraving, solid_gold):
+    if solid_gold == True:
+        cost = solid_gold * (100 + 10 * len(engraving))
+    else:
+        cost = 50 + 7 * len(engraving)
+    return cost
+
+●Question 3
+def get_water_bill(num_gallons):
+    if num_gallons <= 8000:
+        bill = 5 * num_gallons / 1000
+    elif num_gallons <= 22000:
+        bill = 6 * num_gallons / 1000
+    elif num_gallons <= 30000:
+        bill = 7 * num_gallons / 1000
+    else:
+        bill = 10 * num_gallons / 1000
+    return bill
+
+●Question 4
+def get_phone_bill(gb):
+    if gb <= 15:
+        bill = 100
+    else:
+        bill = 100 + (gb - 15) * 100
+    return bill
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
