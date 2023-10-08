@@ -1,1 +1,16 @@
 2023/10/08
+●Using Pandas to Get Familiar With Your Data
+import pandas as pd
+melbourne_file_path = '../input/melbourne-housing-snapshot/melb_data.csv'
+melbourne_data = pd.read_csv(melbourne_file_path) 
+melbourne_data.describe()
+
+●Interpreting Data Description
+　count
+　mean
+　std
+　min
+　25%
+　50%
+　75%
+　max
