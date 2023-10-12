@@ -1,0 +1,114 @@
+2023/10/12
+●Recap
+In[]:
+# Code you have previously used to load data
+import pandas as pd
+from sklearn.tree import DecisionTreeRegressor
+
+# Path of the file to read
+iowa_file_path = '../input/home-data-for-ml-course/train.csv'
+
+home_data = pd.read_csv(iowa_file_path)
+y = home_data.SalePrice
+feature_columns = ['LotArea', 'YearBuilt', '1stFlrSF', '2ndFlrSF', 'FullBath', 'BedroomAbvGr', 'TotRmsAbvGrd']
+X = home_data[feature_columns]
+
+# Specify Model
+iowa_model = DecisionTreeRegressor()
+# Fit Model
+iowa_model.fit(X, y)
+
+print("First in-sample predictions:", iowa_model.predict(X.head()))
+print("Actual target values for those homes:", y.head().tolist())
+
+Out[]:
+First in-sample predictions: [208500. 181500. 223500. 140000. 250000.]
+Actual target values for those homes: [208500, 181500, 223500, 140000, 250000]
+
+■Exercises
+●Step 1: Split Your Data
+In[]:
+# Import the train_test_split function and uncomment
+# from _ import _
+from sklearn.model_selection import train_test_split
+
+# fill in and uncomment
+# train_X, val_X, train_y, val_y = ____
+train_X, val_X, train_y, val_y = train_test_split(X, y, random_state=1)
+
+●Step 2: Specify and Fit the Model
+In[]:
+from sklearn.tree import DecisionTreeRegressor
+
+# Specify the model
+iowa_model = DecisionTreeRegressor(random_state=1)
+
+# Fit iowa_model with the training data.
+iowa_model.fit(train_X, train_y)
+
+Out[]:
+[186500. 184000. 130000.  92000. 164500. 220000. 335000. 144152. 215000.
+ 262000.]
+[186500. 184000. 130000.  92000. 164500. 220000. 335000. 144152. 215000.
+ 262000.]
+
+●Step 3: Make Predictions with Validation data
+In[]:
+# Predict with all validation observations
+val_predictions = iowa_model.predict(val_X)
+
+In[]:
+# print the top few validation predictions
+print(val_predictions[:5])
+# print the top few actual prices from validation data
+print(val_y[:5])
+
+Out[]:
+[186500. 184000. 130000.  92000. 164500.]
+258     231500
+267     179500
+288     122000
+649      84500
+1233    142000
+Name: SalePrice, dtype: int64
+
+※実際の値と予測値との誤差
+  231500 - 186500 = 45,000
+  179500 - 184000 = -4,500
+  122000 - 130000 = -8,000
+   84500 - 92000  = -7,500
+  142000 - 164500 = -22,500
+
+●Step 4: Calculate the Mean Absolute Error in Validation Data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
