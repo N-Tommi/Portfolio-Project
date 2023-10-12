@@ -80,13 +80,17 @@ Name: SalePrice, dtype: int64
   142000 - 164500 = -22,500
 
 ●Step 4: Calculate the Mean Absolute Error in Validation Data
+In[]:
+from sklearn.metrics import mean_absolute_error
+val_mae = mean_absolute_error(val_y, val_predictions)
 
+# uncomment following line to see the validation_mae
+print(val_mae)
 
+Out[]:
+29652.931506849316
 
-
-
-
-
+※平均価格は約3万ドルほど下がる。（平均絶対誤差）
 
 
 
