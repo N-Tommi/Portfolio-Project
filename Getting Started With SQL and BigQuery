@@ -27,16 +27,53 @@ BigQueryでは、各データセットは対応するプロジェクトに含ま
 データセットにアクセスするには、まず、データセットへの参照を dataset() メソッドで作成します。
 次に、先ほど構築した参照とともに get_dataset() メソッドを使用してデータセットを取得します。
 
+In[3]:
+# Construct a reference to the "hacker_news" dataset
+dataset_ref = client.dataset("hacker_news", project="bigquery-public-data")
 
+# API request - fetch the dataset
+dataset = client.get_dataset(dataset_ref)
 
+すべてのデータセットは、単なる表の集まりである。データセットは、行と列で構成された複数の表を含む表計算ファイルと考えることができます。
+list_tables() メソッドを使用して、データセット内のテーブルを一覧表示します。
 
+In[4]:
+# List all the tables in the "hacker_news" dataset
+tables = list(client.list_tables(dataset))
 
+# Print names of all tables in the dataset (there are four!)
+for table in tables:  
+    print(table.table_id)
 
+Out[4]:
+comments
+full
+full_201510
+stories
 
+データセットをフェッチしたのと同様に、テーブルをフェッチすることもできる。
+以下のコードでは、hacker_news データセットの全テーブルを取得しています。
 
+In[5]:
+# Construct a reference to the "full" table
+table_ref = dataset_ref.table("full")
 
+# API request - fetch the table
+table = client.get_table(table_ref)
 
+●Table schema
 
+テーブルの構造をスキーマと呼ぶ。欲しいデータを効率的に取り出すためには、テーブルのスキーマを理解する必要がある。
+この例では、上記で取得したテーブル全体を調査します。
+
+In[6]:
+# Print information on all the columns in the "full" table in the "hacker_news" dataset
+table.schema
+
+Out[6]:
+[SchemaField('title', 'STRING', 'NULLABLE', 'Story title', (), None),
+ SchemaField('url', 'STRING', 'NULLABLE', 'Story url', (), None),
+ SchemaField('text', 'STRING', 'NULLABLE', 'Story or comment text', (), None),・・・・
 
 
 
