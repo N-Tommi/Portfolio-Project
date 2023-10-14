@@ -10,22 +10,186 @@ SQLクエリは膨大なデータセットを整理し、必要な情報だけ�
 
 ●SELECT ... FROM
 
+最も基本的なSQLクエリは、単一のテーブルから単一のカラムを選択します。
+これを行うには
+SELECTの後にカラムを指定し、FROMの後にテーブルを指定する。
 
+例えば、（bigquery-public-dataプロジェクトのpet_recordsデータベースのpetsテーブルから）
+Nameカラムを選択するには、クエリは次のようになります：
 
+''''''''''''
+query = SELECT Name
+        FROM `bigquery-public-data.pet_records.pets`
+''''''''''''
 
+※※
+SQLクエリを書くとき、
+FROMに渡す引数はシングルクォーテーションやダブルクォーテーション（'や""）ではないことに注意してください。
+バックスティック（`）です。
 
+●WHERE ...
 
+BigQueryのデータセットは大きいので、通常は特定の条件を満たす行だけを返したいでしょう。そのためにはWHERE句を使用します。
 
+以下のクエリは、Nameカラムのうち、Animalカラムのテキストが'Cat'である行のエントリを返します。
 
+''''''''''''
+query = SELECT Name
+        FROM `bigquery-public-data.pet_records.pets`
+        WHERE Animal = `Cat`
+''''''''''''
 
+●Example: What are all the U.S. cities in the OpenAQ dataset?
 
+まず、クエリを実行するために必要なものをすべてセットアップし、データベースにどのようなテーブルがあるのかを簡単に覗いてみる。
 
+In[1]:
+from google.cloud import bigquery
 
+# Create a "Client" object
+client = bigquery.Client()
 
+# Construct a reference to the "openaq" dataset
+dataset_ref = client.dataset("openaq", project="bigquery-public-data")
 
+# API request - fetch the dataset
+dataset = client.get_dataset(dataset_ref)
 
+# List all the tables in the "openaq" dataset
+tables = list(client.list_tables(dataset))
 
+# Print names of all tables in the dataset (there's only one!)
+for table in tables:  
+    print(table.table_id)
 
+Out[1]:
+Using Kaggle's public dataset BigQuery integration.
+global_air_quality
 
+このデータセットには、global_air_qualityというテーブルがひとつだけ含まれている。
+そのテーブルを取得し、最初の数行を見て、どのようなデータが含まれているのか見てみよう。
+
+In[2]:
+# Construct a reference to the "global_air_quality" table
+table_ref = dataset_ref.table("global_air_quality")
+
+# API request - fetch the table
+table = client.get_table(table_ref)
+
+# Preview the first five lines of the "global_air_quality" table
+client.list_rows(table, max_results=5).to_dataframe()
+
+クエリーを作ってみよう。countryカラムが'US'である行に含まれるcityカラムの値をすべて選択したいとします。
+
+In[3]:
+# Query to select all the items from the "city" column where the "country" column is 'US'
+query = """
+        SELECT city
+        FROM `bigquery-public-data.openaq.global_air_quality`
+        WHERE country = 'US'
+        """
+
+●Submitting the query to the dataset
+
+このクエリを使って、OpenAQ データセットから情報を取得する準備ができました。
+前のチュートリアルと同様に、最初のステップは Client オブジェクトを作成することです。
+
+In[4]:
+# Create a "Client" object
+client = bigquery.Client()
+
+Out[4]:
+Using Kaggle's public dataset BigQuery integration.
+
+まずは query() メソッドでクエリを設定します。デフォルトのパラメータを指定してこのメソッドを実行しますが、
+このメソッドではより複雑な設定を指定することもできます。これについては後ほど説明します。
+
+In[5]:
+# Set up the query
+query_job = client.query(query)
+
+次に、クエリを実行し、結果をpandas DataFrameに変換します。
+
+In[6]:
+# API request - run the query, and return a pandas DataFrame
+us_cities = query_job.to_dataframe()
+
+これで、us_citiesというpandasのDataFrameができたので、他のDataFrameと同じように使うことができる。
+
+In[7]:
+# What five cities have the most measurements?
+us_cities.city.value_counts().head()
+
+Out[7]:
+Phoenix-Mesa-Scottsdale                     39414
+Los Angeles-Long Beach-Santa Ana            27479
+Riverside-San Bernardino-Ontario            26887
+New York-Northern New Jersey-Long Island    25417
+San Francisco-Oakland-Fremont               22710
+Name: city, dtype: int64
+
+●More queries
+
+複数の列が必要な場合は、名前の間にカンマを入れて選択することができます：
+
+In[8]:
+query = """
+        SELECT city, country
+        FROM `bigquery-public-data.openaq.global_air_quality`
+        WHERE country = 'US'
+        """
+
+このように*ですべての列を選択できる：
+
+In[9]:
+query = """
+        SELECT *
+        FROM `bigquery-public-data.openaq.global_air_quality`
+        WHERE country = 'US'
+        """
+
+●Working with big datasets
+
+一度に大量のデータをスキャンしないようにする方法をお教えします。
+
+まず、クエリを実行する前に、クエリのサイズを見積もることができます。
+以下は、Hacker Newsデータセット（非常に大きい！）を使った例です。
+クエリがスキャンするデータ量を見るために、QueryJobConfigオブジェクトを作成し、dry_runパラメータをTrueに設定します。
+
+In[10]:
+# Query to get the score column from every row where the type column has value "job"
+query = """
+        SELECT score, title
+        FROM `bigquery-public-data.hacker_news.full`
+        WHERE type = "job" 
+        """
+
+# Create a QueryJobConfig object to estimate size of query without running it
+dry_run_config = bigquery.QueryJobConfig(dry_run=True)
+
+# API request - dry run query to estimate costs
+dry_run_query_job = client.query(query, job_config=dry_run_config)
+
+print("This query will process {} bytes.".format(dry_run_query_job.total_bytes_processed))
+
+out[10]:
+This query will process 553320240 bytes.
+
+クエリー実行時にパラメーターを指定して、スキャンするデータ量を制限することもできます。
+以下は、上限を低く設定した例です。
+
+In[11]:
+# Only run the query if it's less than 1 GB
+ONE_MB = 1000*1000*1000
+safe_config = bigquery.QueryJobConfig(maximum_bytes_billed=ONE_MB)
+
+# Set up the query (will only run if it's less than 1 MB)
+safe_query_job = client.query(query, job_config=safe_config)
+
+# API request - try to run the query, and return a pandas DataFrame
+safe_query_job.to_dataframe()
+
+out[11]:
+1.7267060367454068
 
 
