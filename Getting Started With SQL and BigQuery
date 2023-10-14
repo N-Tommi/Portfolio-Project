@@ -1,0 +1,61 @@
+2023/10/14
+●Introduction
+このレッスンでは、BigQueryデータセットへのアクセスと調査の基本を学びます。
+これらの基本を押さえた後、SQLのスキルを身につけるために戻ってきます。
+
+●Your first BigQuery commands
+
+BigQueryを使うために、以下のPythonパッケージをインポートする：
+
+In[1]:
+from google.cloud import bigquery
+
+ワークフローの最初のステップは、Clientオブジェクトを作成することです。
+すぐにわかるように、このClientオブジェクトはBigQueryデータセットから情報を取得する際に中心的な役割を果たします。
+
+In[2]:
+# Create a "Client" object
+client = bigquery.Client()
+
+Kaggleの公開データセットBigQueryの統合を使用。
+
+ここでは、コンピュータサイエンスとサイバーセキュリティのニュースに焦点を当てたウェブサイトであるHacker Newsへの投稿のデータセットを使用します。
+
+BigQueryでは、各データセットは対応するプロジェクトに含まれています。
+この場合、hacker_news データセットは bigquery-public-data プロジェクトに含まれます。
+
+データセットにアクセスするには、まず、データセットへの参照を dataset() メソッドで作成します。
+次に、先ほど構築した参照とともに get_dataset() メソッドを使用してデータセットを取得します。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
