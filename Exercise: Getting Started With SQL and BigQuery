@@ -3,3 +3,117 @@
 
 ※フェッチ【DB】（英：fetch）：データベースの検索結果から1件抜き出すこと
 
+In[]:
+from google.cloud import bigquery
+
+# Create a "Client" object
+client = bigquery.Client()
+
+# Construct a reference to the "chicago_crime" dataset
+dataset_ref = client.dataset("chicago_crime", project="bigquery-public-data")
+
+# API request - fetch the dataset
+dataset = client.get_dataset(dataset_ref)
+
+●Exercises
+
+1) Count tables in the dataset
+
+In[]:
+# Write the code you need here to figure out the answer
+tables = list(client.list_tables(dataset))
+print(len(tables))
+
+for table in tables:
+    print(table.table_id)
+
+Out[]:
+1
+crime
+
+In[]:
+# Store the answer as num_tables and then run this cell
+num_tables = 1  
+
+2) Explore the table schema
+
+In[]:
+# Write the code to figure out the answer
+table_ref = dataset_ref.table("crime")
+table = client.get_table(table_ref)
+table.schema
+
+Out[]:
+[SchemaField('unique_key', 'INTEGER', 'REQUIRED', None, (), None),
+ SchemaField('case_number', 'STRING', 'NULLABLE', None, (), None),
+ SchemaField('date', 'TIMESTAMP', 'NULLABLE', None, (), None),
+ SchemaField('block', 'STRING', 'NULLABLE', None, (), None),
+ SchemaField('iucr', 'STRING', 'NULLABLE', None, (), None),
+ SchemaField('primary_type', 'STRING', 'NULLABLE', None, (), None),
+ SchemaField('description', 'STRING', 'NULLABLE', None, (), None),
+ SchemaField('location_description', 'STRING', 'NULLABLE', None, (), None),
+ SchemaField('arrest', 'BOOLEAN', 'NULLABLE', None, (), None),
+ SchemaField('domestic', 'BOOLEAN', 'NULLABLE', None, (), None),
+ SchemaField('beat', 'INTEGER', 'NULLABLE', None, (), None),
+ SchemaField('district', 'INTEGER', 'NULLABLE', None, (), None),
+ SchemaField('ward', 'INTEGER', 'NULLABLE', None, (), None),
+ SchemaField('community_area', 'INTEGER', 'NULLABLE', None, (), None),
+ SchemaField('fbi_code', 'STRING', 'NULLABLE', None, (), None),
+ SchemaField('x_coordinate', 'FLOAT', 'NULLABLE', None, (), None),
+ SchemaField('y_coordinate', 'FLOAT', 'NULLABLE', None, (), None),
+ SchemaField('year', 'INTEGER', 'NULLABLE', None, (), None),
+ SchemaField('updated_on', 'TIMESTAMP', 'NULLABLE', None, (), None),
+ SchemaField('latitude', 'FLOAT', 'NULLABLE', None, (), None),
+ SchemaField('longitude', 'FLOAT', 'NULLABLE', None, (), None),
+ SchemaField('location', 'STRING', 'NULLABLE', None, (), None)]
+
+In[]:
+# Put your answer here
+num_timestamp_fields = 2 
+
+3) Create a crime map
+
+各犯罪が発生した場所に点が表示された地図を作成する場合、犯罪テーブルから犯罪を地図上にプロットするために必要な2つのフィールドの名前は何でしょうか？
+
+In[]:
+# Write the code here to explore the data so you can find the answer
+client.list_rows(table, max_results = 3).to_dataframe()
+
+In[]:
+fields_for_plotting = ['latitude', 'longitude'] 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
