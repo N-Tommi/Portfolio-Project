@@ -43,15 +43,106 @@ query = SELECT Animai,COUNT(ID)
 
 ●GROUP BY ... HAVING
 
+HAVINGはGROUP BYと組み合わせて使用し、特定の条件を満たさないグループを無視します。
 
+そのため、例えばこのクエリでは、複数のIDを持つグループのみが含まれます。
+指定された条件を満たすグループは1つだけなので、クエリは1行だけのテーブルを返します。
 
+''''''''''''
+query = SELECT Animai,COUNT(ID)
+        FROM `bigquery-public-data.pet_records.pets`
+        GROUP BY Animal
+        HAVING COUNT(ID)>1
+''''''''''''
 
+●Example: Which Hacker News comments generated the most discussion?
 
+Hacker News データセットには、ソーシャルネットワーキングサイト Hacker News のストーリーとコメントの情報が含まれています。
+ここではコメントテーブルを扱い、まず最初の数行を表示します。
 
+In[1]:
+from google.cloud import bigquery
 
+# Create a "Client" object
+client = bigquery.Client()
 
+# Construct a reference to the "hacker_news" dataset
+dataset_ref = client.dataset("hacker_news", project="bigquery-public-data")
 
+# API request - fetch the dataset
+dataset = client.get_dataset(dataset_ref)
 
+# Construct a reference to the "comments" table
+table_ref = dataset_ref.table("comments")
+
+# API request - fetch the table
+table = client.get_table(table_ref)
+
+# Preview the first five lines of the "comments" table
+client.list_rows(table, max_results=5).to_dataframe()
+
+In[2]:
+# Query to select comments that received more than 10 replies
+query_popular = """
+                SELECT parent, COUNT(id)
+                FROM `bigquery-public-data.hacker_news.comments`
+                GROUP BY parent
+                HAVING COUNT(id) > 10
+                """
+
+クエリの準備ができたので、実行し、結果をpandas DataFrameに保存してみましょう：
+
+In[3]:
+# Set up the query (cancel the query if it would use too much of 
+# your quota, with the limit set to 10 GB)
+safe_config = bigquery.QueryJobConfig(maximum_bytes_billed=10**10)
+query_job = client.query(query_popular, job_config=safe_config)
+
+# API request - run the query, and convert the results to a pandas DataFrame
+popular_comments = query_job.to_dataframe()
+
+# Print the first five rows of the DataFrame
+popular_comments.head()
+
+●Aliasing and other improvements
+
+クエリーをより良いものにするためのヒントをいくつか紹介しよう：
+
+・COUNT(id)の結果のカラムはf0__と呼ばれていた。これはあまり説明的な名前ではない。
+　集計を指定した後にAS NumPostsを追加することで、名前を変更することができる。これはエイリアシングと呼ばれ、次回のレッスンで詳しく説明します。
+
+・COUNT()関数の中に何を書くか迷ったら、COUNT(1)を使って各グループの行を数えることができます。
+　他の列に注目していないことがわかるので、ほとんどの人が特に読みやすいと感じるでしょう。
+　また、カラム名を指定した場合よりもスキャンするデータ量が少なくなります（より高速になり、データアクセス枠の使用量も少なくなります）。
+
+In[4]:
+# Improved version of earlier query, now with aliasing & improved readability
+query_improved = """
+                 SELECT parent, COUNT(1) AS NumPosts
+                 FROM `bigquery-public-data.hacker_news.comments`
+                 GROUP BY parent
+                 HAVING COUNT(1) > 10
+                 """
+
+safe_config = bigquery.QueryJobConfig(maximum_bytes_billed=10**10)
+query_job = client.query(query_improved, job_config=safe_config)
+
+# API request - run the query, and convert the results to a pandas DataFrame
+improved_df = query_job.to_dataframe()
+
+# Print the first five rows of the DataFrame
+improved_df.head()
+
+●Note on using GROUP BY
+
+GROUP BYはSQLに集約関数（COUNT()など）の適用方法を指示するため、
+集約関数なしでGROUP BYを使用しても意味がないことに注意してください。
+同様に、GROUP BY句がある場合は、すべての変数を
+
+・コマンド、または
+・集約関数
+
+のいずれかに渡さなければなりません。
 
 
 
