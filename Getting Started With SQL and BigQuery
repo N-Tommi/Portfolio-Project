@@ -76,16 +76,28 @@ Out[6]:
  SchemaField('text', 'STRING', 'NULLABLE', 'Story or comment text', (), None),・・・・
 
 
+それぞれのSchemaFieldは、特定のカラム（フィールドとも呼ぶ）について教えてくれる。
+順を追って説明する：
 
+1.name：カラムの名前
+2.field type：カラムのフィールド型（またはデータ型）。
+3.mode：カラムのモード（'NULLABLE'はカラムがNULL値を許容することを意味し、デフォルトである）。
+4.description：そのカラムのデータの説明
 
+list_rows()メソッドを使用して、テーブル全体の最初の5行だけをチェックし、これが正しいことを確認できます。
+(データベースの記述が古いこともあるので、確認するのはよいことです)
+これは BigQuery の RowIterator オブジェクトを返します。このオブジェクトは、to_dataframe() メソッドですぐに pandas DataFrame に変換できます。
 
+In[7]:
+# Preview the first five lines of the "full" table
+client.list_rows(table, max_results=5).to_dataframe()
 
+list_rows()メソッドは、特定のカラムの情報だけを見ることもできる。
+たとえば、by 列の最初の 5 つのエントリを見たい場合は、下記のようにする。
 
-
-
-
-
-
+In[8]:
+# Preview the first five entries in the "by" column of the "full" table
+client.list_rows(table, selected_fields=table.schema[:1], max_results=5).to_dataframe()
 
 
 
