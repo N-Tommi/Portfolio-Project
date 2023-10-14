@@ -2,3 +2,54 @@
 ●Introduction
 
 In[]:
+from google.cloud import bigquery
+
+# Create a "Client" object
+client = bigquery.Client()
+
+# Construct a reference to the "hacker_news" dataset
+dataset_ref = client.dataset("hacker_news", project="bigquery-public-data")
+
+# API request - fetch the dataset
+dataset = client.get_dataset(dataset_ref)
+
+# Construct a reference to the "full" table
+table_ref = dataset_ref.table("full")
+
+# API request - fetch the table
+table = client.get_table(table_ref)
+
+# Preview the first five lines of the "comments" table
+client.list_rows(table, max_results=5).to_dataframe()
+
+●Exercises
+1) Prolific commenters
+
+Hacker Newsは10,000以上の投稿をした人全員に賞を送りたいと考えています。
+10,000以上の投稿をしたすべての著者とその投稿数を返すクエリを書きます。投稿数の列を NumPosts と呼びます。
+
+
+※※エラー
+
+https://www.kaggle.com/code/jaspreetlall/ex-3-of-intro-to-sql-with-working-setup-code/notebook
+
+https://www.kaggle.com/discussions/getting-started/96715
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
