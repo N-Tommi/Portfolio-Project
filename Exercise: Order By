@@ -4,22 +4,94 @@
 SQLのスキルは十分に身についたので、残りの実習では説明で見たのとは違うデータセットを使うことになるでしょう。
 新しいデータセットについて知る必要がある場合は、SELECTクエリをいくつか実行して、必要なデータを抽出して確認することができます。
 
+世界銀行は、BigQueryを通じて大量の興味深い教育データを公開している。
+次のセルを実行すると、world_bank_intl_educationデータセットのinternational_educationテーブルの最初の数行が表示されます。
+
+In[]:
+from google.cloud import bigquery
+
+# Create a "Client" object
+client = bigquery.Client()
+
+# Construct a reference to the "world_bank_intl_education" dataset
+dataset_ref = client.dataset("world_bank_intl_education", project="bigquery-public-data")
+
+# API request - fetch the dataset
+dataset = client.get_dataset(dataset_ref)
+
+# Construct a reference to the "international_education" table
+table_ref = dataset_ref.table("international_education")
+
+# API request - fetch the table
+table = client.get_table(table_ref)
+
+# Preview the first five lines of the "international_education" table
+client.list_rows(table, max_results=5).to_dataframe()
 
 
+Out[]:
+country_name	country_code	indicator_name	indicator_code	value	year
+0	Chad	TCD	Enrolment in lower secondary education, both s...	UIS.E.2	321921.0	2012
+1	Chad	TCD	Enrolment in upper secondary education, both s...	UIS.E.3	68809.0	2006
+2	Chad	TCD	Enrolment in upper secondary education, both s...	UIS.E.3	30551.0	1999
+3	Chad	TCD	Enrolment in upper secondary education, both s...	UIS.E.3	79784.0	2007
+4	Chad	TCD	Repeaters in primary education, all grades, bo...	UIS.R.1	282699.0	2006
+
+●Exercises
+
+indicator_code列の値は、指定された行にどのようなデータが表示されているかを示している。
+
+興味深い指標コードの1つはSE.XPD.TOTL.GD.ZSで、これは「GDPに占める教育への政府支出(%)」に相当する。
+
+1) Government expenditure on education
+
+GDPに占める教育費の割合が最も大きい国は？
+
+この質問に答えるには、データセット中の指標コードSE.XPD.TOTL.GD.ZSに対応する行のみを考慮し、
+2010年から2017年（平均値には2010年と2017年を含む）の間のデータセット中の各国の値列の平均値を返すクエリを記述する。
+
+要件：
+
+・結果は、国コードではなく、国名でなければなりません。それぞれの国について1行を持つ。
+・平均の集約関数は AVG() です。この集計によって作成される列には avg_ed_spending_pct という名前を使用します。
+・GDPに占める教育費の割合が最も大きい国が最初に表示されるように、結果を並べ替えます。
+
+In[]:
+country_spend_pct_query = """
+                          SELECT country_name, AVG(value) AS avg_ed_spending_pct
+                          FROM `bigquery-public-data.world_bank_intl_education.international_education`
+                          WHERE indicator_code = 'SE.XPD.TOTL.GD.ZS' and year >= 2010 and year <= 2017
+                          GROUP BY country_name
+                          ORDER BY avg_ed_spending_pct DESC
+                          """
+
+# Set up the query (cancel the query if it would use too much of 
+# your quota, with the limit set to 1 GB)
+safe_config = bigquery.QueryJobConfig(maximum_bytes_billed=10**10)
+country_spend_pct_query_job = client.query(country_spend_pct_query, job_config=safe_config)
+
+# API request - run the query, and return a pandas DataFrame
+country_spending_results = country_spend_pct_query_job.to_dataframe()
+
+# View top few rows of results
+print(country_spending_results.head())
 
 
+Out[]:
+            country_name  avg_ed_spending_pct
+0                   Cuba            12.837270
+1  Micronesia, Fed. Sts.            12.467750
+2        Solomon Islands            10.001080
+3                Moldova             8.372153
+4                Namibia             8.349610
 
+2) Identify interesting codes to explore
 
+最後の質問では、SE.XPD.TOTL.GD.ZSというコードを持つ行に注目するよう指示しました。
+しかし、探索すべきもっと興味深い指標コードをどうやって見つけるのでしょうか？
 
-
-
-
-
-
-
-
-
-
+データセットには1,000を超えるコードがあるので、すべてを確認するには時間がかかります。
+しかし、多くのコードは数カ国のみで利用可能です。様々なコードのオプションを閲覧する際、多くの国から報告されているコードに限定することもできます。
 
 
 
