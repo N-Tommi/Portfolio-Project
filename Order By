@@ -8,6 +8,78 @@ ORDER BY 句を使用して結果の順序を変更する方法を学び、日�
 ORDER BYは通常、クエリの最後の節で、クエリの残りの部分で返される結果を並べ替えます。
 行がIDカラムで並べられていないことに注意してください。これは以下のクエリですぐに修正できます。
 
+''''''''''''
+query = SELECT ID,Name,Animal
+        FROM `bigquery-public-data.pet_records.pets`
+        ORDER BY ID
+''''''''''''
+
+ORDER BY句は、結果をアルファベット順に表示するテキストを含むカラムに対しても機能する。
+
+''''''''''''
+query = SELECT ID,Name,Animal
+        FROM `bigquery-public-data.pet_records.pets`
+        ORDER BY Animal
+''''''''''''
+
+DESC引数（'descending'の略）を使って順序を逆にすることができます。
+次のクエリは、Animalカラムでテーブルをソートし、アルファベット順で最後の値を最初に返します。
+
+''''''''''''
+query = SELECT ID,Name,Animal
+        FROM `bigquery-public-data.pet_records.pets`
+        ORDER BY Animal DESC
+''''''''''''
+
+●Dates
+
+次に日付について説明します。日付は実際のデータベースで非常に頻繁に登場するからです。
+BigQueryでは、日付をDATEとして格納する方法とDATETIMEとして格納する方法があります。
+
+DATE形式では、まず年、次に月、そして日の順になります。以下のようになります：
+
+YYYY-[M]M-[D]D
+
+・YYYY：4桁の年
+・[M]M：1桁または2桁の月
+・[D]D：1桁または2桁の日
+
+DATETIMEフォーマットは日付フォーマットのようなものだが......最後に時間が追加される。
+
+●EXTRACT
+
+年や日など、日付の一部を調べたいことがよくある。このような場合はEXTRACTを使用します。
+
+以下のクエリは2つのカラムを返し、カラムDayはpets_with_dateテーブルのDateカラムの各エントリーに対応する日を含む：
+
+''''''''''''
+query = SELECT Name,EXTRACT(Day from Date) AS Day
+        FROM `bigquery-public-data.pet_records.pets`
+''''''''''''
+
+SQLは日付に関して非常に賢く、セルの一部を抽出する以上の情報を求めることができます。
+例えば、このクエリはDateカラムの各日付について、年の週（1～53の間）だけを1つのカラムに返します：
+
+''''''''''''
+query = SELECT Name,EXTRACT(Week from Date) AS Week
+        FROM `bigquery-public-data.pet_records.pets`
+''''''''''''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
