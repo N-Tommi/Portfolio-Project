@@ -93,15 +93,45 @@ Out[]:
 データセットには1,000を超えるコードがあるので、すべてを確認するには時間がかかります。
 しかし、多くのコードは数カ国のみで利用可能です。様々なコードのオプションを閲覧する際、多くの国から報告されているコードに限定することもできます。
 
+2016年に少なくとも175行を持つすべてのコードの指標コードと指標名を選択するクエリを以下に記述します。
+
+要件：
+
+・各インジケータ・コードに1行ずつ記入してください。
+・結果のカラムは、indicator_code、indicator_name、num_rowsとします。
+・生データベースに175行以上あるコードのみを選択してください（正確に175行が含まれます）。
+・結果のDataFrameでindicator_codeとindicator_nameの両方を取得するには、（COUNT()集約に加えて）SELECT文に両方を含める必要があります。
+　そのためには、GROUP BY句に両方を含める必要があります。
+・頻度の高いものから低いものへと順番に並べます。
+
+In[]:
+code_count_query = """
+                   SELECT indicator_code, indicator_name, COUNT(1) AS num_rows
+                   FROM `bigquery-public-data.world_bank_intl_education.international_education`
+                   WHERE year = 2016
+                   GROUP BY indicator_name, indicator_code
+                   HAVING COUNT(1) >= 175
+                   ORDER BY COUNT(1) DESC
+　　　　　　　　     """
+
+# Set up the query
+safe_config = bigquery.QueryJobConfig(maximum_bytes_billed=10**10)
+code_count_query_job = client.query(code_count_query, job_config=safe_config)
+
+# API request - run the query, and return a pandas DataFrame
+code_count_results = code_count_query_job.to_dataframe()
+
+# View top few rows of results
+print(code_count_results.head())
 
 
-
-
-
-
-
-
-
+Out[]:
+   indicator_code                       indicator_name  num_rows
+0     SP.POP.GROW         Population growth (annual %)       232
+1     SP.POP.TOTL                    Population, total       232
+2  IT.NET.USER.P2      Internet users (per 100 people)       223
+3     SH.DYN.MORT  Mortality rate, under-5 (per 1,000)       213
+4  SP.POP.0014.TO         Population, ages 0-14, total       213
 
 
 
