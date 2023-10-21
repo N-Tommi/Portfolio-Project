@@ -121,16 +121,36 @@ query = """
         ORDER BY num_accidents DESC
         """
 
+As usual, we run it as follows:
+
+In[3]:
+# Set up the query (cancel the query if it would use too much of 
+# your quota, with the limit set to 1 GB)
+safe_config = bigquery.QueryJobConfig(maximum_bytes_billed=10**9)
+query_job = client.query(query, job_config=safe_config)
+
+# API request - run the query, and convert the results to a pandas DataFrame
+accidents_by_day = query_job.to_dataframe()
+
+# Print the DataFrame
+accidents_by_day
+
+Out[3]:
+num_accidents	day_of_week
+0	5659	7
+1	5298	1
+2	4916	6
+3	4460	5
+4	4182	4
+5	4038	2
+6	3985	3
 
 
+データはnum_accidents列でソートされており、交通事故の多い日が最初に表示されていることに注目してください。
 
-
-
-
-
-
-
-
+day_of_weekカラムに返された数字を実際の曜日に対応付けるには、BigQueryのDAYOFWEEK関数のドキュメントを参照してください。
+それによると、DAYOFWEEK関数は「1（日曜日）から7（土曜日）を含む整数」を返すそうです。
+つまり、2015年の米国では、自動車死亡事故は日曜日と土曜日に最も多く発生し、火曜日に最も少なく発生している。
 
 
 
