@@ -67,23 +67,160 @@ Out[]:
   -  テーブル名。これは、1) データを検索する で答えとして使用したものです。
   -  バックスティック（記号 `）。
 
+In[]:
+rides_per_year_query = """
+                       SELECT EXTRACT(YEAR FROM trip_start_timestamp) AS year, 
+                              COUNT(1) AS num_trips
+                       FROM `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+                       GROUP BY year
+                       ORDER BY year
+                       """
 
+# Set up the query (cancel the query if it would use too much of 
+# your quota)
+safe_config = bigquery.QueryJobConfig(maximum_bytes_billed=10**10)
+rides_per_year_query_job = client.query(rides_per_year_query, job_config=safe_config)
 
+# API request - run the query, and return a pandas DataFrame
+rides_per_year_result = rides_per_year_query_job.to_dataframe()
 
+# View results
+print(rides_per_year_result)
 
+Out[]:
+    year  num_trips
+0   2013   27217300
+1   2014   37395079
+2   2015   32385527
+3   2016   31756403
+4   2017   24979611
+5   2018   20731105
+6   2019   16476440
+7   2020    3888831
+8   2021    3947677
+9   2022    6382071
+10  2023    4896118
 
+4) Dive slightly deeper
 
+2016年の乗車を詳しく調べたい。上のrides_per_year_queryで使用したクエリを下のrides_per_month_queryのセルにコピーします。
+その後、2つの方法で修正します：
 
+・WHERE句を使用して、クエリを2016年のデータに限定します。
+・年ではなく月を抽出するようにクエリを変更します。
 
+In[]:
+rides_per_month_query = """
+                        SELECT EXTRACT(MONTH FROM trip_start_timestamp) AS month, 
+                               COUNT(1) AS num_trips
+                        FROM `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+                        WHERE EXTRACT(YEAR FROM trip_start_timestamp) = 2016
+                        GROUP BY month
+                        ORDER BY month
+                        """
 
+# Set up the query
+safe_config = bigquery.QueryJobConfig(maximum_bytes_billed=10**10)
+rides_per_month_query_job = client.query(rides_per_month_query, job_config=safe_config)
 
+# API request - run the query, and return a pandas DataFrame
+rides_per_month_result = rides_per_month_query_job.to_dataframe()
 
+# View results
+print(rides_per_month_result)
 
+Out[]:
+    month  num_trips
+0       1    2510389
+1       2    2568433
+2       3    2851106
+3       4    2854290
+4       5    2859147
+5       6    2841872
+6       7    2682912
+7       8    2629482
+8       9    2532650
+9      10    2725340
+10     11    2387790
+11     12    2312992
 
+5) Write the query
 
+クエリの洗練度を上げる時です。データセットの1日の各時間について、対応するトリップ数と平均速度を表示するクエリを書いてください。
 
+結果には3つの列があるはずだ：
 
+・hour_of_day - trip_start_timestampから時間を抽出した結果を保持するこの列でソートする。
+・num_trips - 1日の各時間におけるトリップの総数のカウント（例：午前6時から午前7時までの間に何回のトリップが開始されたか。）
+・avg_mph - その日のその時間帯に開始したトリップの平均時速。平均時速は3600 * SUM(trip_miles) / SUM(trip_seconds)として計算される。
+　(3600という値は、秒から時間への変換に使用される)。
 
+以下の条件を満たすデータにクエリーを制限する：
+
+・a trip_start_timestamp > 2016-01-01 and < 2016-04-01
+・trip_seconds > 0 and trip_miles > 0
+
+共通テーブル式（CTE）を使用して、関連するライドだけを選択します。このデータセットは非常に大きいので、
+このCTEは最終的な出力を作成するために必要な列のみを選択する必要があります
+（ただし、実際にはCTE内で列を作成するのではなく、CTEより後のSELECT文で列を作成します）。
+
+In[]:
+speeds_query = """
+               WITH RelevantRides AS
+               (
+                   SELECT EXTRACT(HOUR FROM trip_start_timestamp) AS hour_of_day, 
+                          trip_miles, 
+                          trip_seconds
+                   FROM `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+                   WHERE trip_start_timestamp > '2016-01-01' AND 
+                         trip_start_timestamp < '2016-04-01' AND 
+                         trip_seconds > 0 AND 
+                         trip_miles > 0
+               )
+               SELECT hour_of_day, 
+                      COUNT(1) AS num_trips, 
+                      3600 * SUM(trip_miles) / SUM(trip_seconds) AS avg_mph
+               FROM RelevantRides
+               GROUP BY hour_of_day
+               ORDER BY hour_of_day
+               """
+
+# Set up the query
+safe_config = bigquery.QueryJobConfig(maximum_bytes_billed=10**10)
+speeds_query_job =client.query(speeds_query, job_config=safe_config)
+
+# API request - run the query, and return a pandas DataFrame
+speeds_result = speeds_query_job.to_dataframe()
+
+# View results
+print(speeds_result)
+
+Out[]:
+    hour_of_day  num_trips    avg_mph
+0             0     203092  20.191744
+1             1     178046  18.628598
+2             2     143447  18.444370
+3             3     108899  19.273107
+4             4      80067  27.599669
+5             5      75786  33.065604
+6             6     102254  28.533112
+7             7     187585  19.884592
+8             8     284223  16.787900
+9             9     306854  18.434124
+10           10     279762  20.091309
+11           11     294006  20.926340
+12           12     311522  20.063901
+13           13     317225  19.766321
+14           14     312629  19.309655
+15           15     319953  18.515564
+16           16     349455  17.168814
+17           17     394324  14.641375
+18           18     431991  15.381995
+19           19     416743  17.795008
+20           20     356279  20.347398
+21           21     318363  22.584731
+22           22     289886  21.129847
+23           23     241690  20.259757
 
 
 
