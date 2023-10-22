@@ -44,6 +44,38 @@ client.list_rows(table, max_results=5).to_dataframe()
 Out[]:
 5 rows × 23 columns
 
+3) Determine when this data is from
+
+データが十分に古い場合、そのデータが現在の交通パターンにまだ関連性があると仮定する前に注意する必要があります。
+各年のトリップ数をカウントするクエリを書いてください。
+
+結果には2つの列があるはずです：
+
+・year - トリップの年
+・num_trips - その年のトリップ数。
+
+ヒント：
+
+・GROUP BYとORDER BYを使用する場合、SELECTクエリの先頭で設定した年という別名でカラムを参照する必要があります。
+・trip_start_timestampから年をSELECTするSQLコードは、SELECT EXTRACT(YEAR FROM trip_start_timestamp)です。
+・FROMフィールドは慣れるまで少し厄介です。書式は以下の通り：
+　- バッキック（記号`）。
+  - プロジェクト名。この場合はbigquery-public-data。
+  - ピリオド。
+  - データセット名。この場合、chicago_taxi_trips。
+  -  期間。
+  -  テーブル名。これは、1) データを検索する で答えとして使用したものです。
+  -  バックスティック（記号 `）。
+
+
+
+
+
+
+
+
+
+
 
 
 
