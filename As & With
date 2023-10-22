@@ -104,6 +104,49 @@ block_timestamp列には各トランザクションの日付がDATETIME形式で
 
 CTEを使用してこれを行い、クエリの次の部分で各日付のトランザクション数をカウントし、より早い日付が最初に表示されるようにテーブルをソートします
 
+In[2]:
+# Query to select the number of transactions per date, sorted by date
+query_with_CTE = """ 
+                 WITH time AS 
+                 (
+                     SELECT DATE(block_timestamp) AS trans_date
+                     FROM `bigquery-public-data.crypto_bitcoin.transactions`
+                 )
+                 SELECT COUNT(1) AS transactions,
+                        trans_date
+                 FROM time
+                 GROUP BY trans_date
+                 ORDER BY trans_date
+                 """
+
+# Set up the query (cancel the query if it would use too much of 
+# your quota, with the limit set to 10 GB)
+safe_config = bigquery.QueryJobConfig(maximum_bytes_billed=10**10)
+query_job = client.query(query_with_CTE, job_config=safe_config)
+
+# API request - run the query, and convert the results to a pandas DataFrame
+transactions_by_date = query_job.to_dataframe()
+
+# Print the first five rows
+transactions_by_date.head()
+
+これらはソートされて返されるので、このデータセットの全期間にわたる1日あたりのビットコイン取引数を示すために、生の結果を簡単にプロットすることができる。
+
+In[3]:
+transactions_by_date.set_index('trans_date').plot()
+
+
+このように、共通テーブル式（CTE）を使えば、データクリーニングの多くをSQLに移行することができます。
+特にBigQueryの場合、Pandasで処理するよりも圧倒的に速いので、これは良いことです。
+
+
+
+
+
+
+
+
+
 
 
 
