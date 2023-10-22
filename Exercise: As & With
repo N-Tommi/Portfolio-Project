@@ -1,3 +1,64 @@
 2023/10/22
 ●Introduction
 
+In[]:
+from google.cloud import bigquery
+
+# Create a "Client" object
+client = bigquery.Client()
+
+# Construct a reference to the "chicago_taxi_trips" dataset
+dataset_ref = client.dataset("chicago_taxi_trips", project="bigquery-public-data")
+
+# API request - fetch the dataset
+dataset = client.get_dataset(dataset_ref)
+
+1) Find the data
+
+データにアクセスする前に、データのあるテーブル名を見つける必要があります。
+
+In[]:
+# List all the tables in the dataset
+tables = list(client.list_tables(dataset))
+
+# Print names of all tables in the dataset (there is only one!)
+for table in tables:  
+    print(table.table_id)
+
+Out[]:
+taxi_trips
+
+In[]:
+# Write the table name as a string below
+table_name = "taxi_trips"
+
+2) Peek at the data
+
+次のコード・セルを使って、データの上位数行を覗いてみる。データを検査し、データ品質に問題があるかどうかすぐにわかるかどうかを確認する。
+
+In[]:
+table_ref = dataset_ref.table("taxi_trips")
+table = client.get_table(table_ref)
+client.list_rows(table, max_results=5).to_dataframe()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
