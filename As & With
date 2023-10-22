@@ -1,1 +1,114 @@
+2023/10/22
+●Introduction
+
+SQLクエリは長くなり、理解する（そしてデバッグする）のが難しくなります。
+
+これからASとWITHを使ってクエリを整理し、読みやすくする方法を学びます。
+
+●AS
+
+以前のチュートリアルで、ASを使用してクエリーによって生成されたカラムの名前を変更する方法を学びました。
+これは、Pythonがimport pandas as pdやimport seaborn as snsのようにインポートする際にasを使ってエイリアシングするのと似ています。
+
+SQLでASを使うには、選択したカラムの直後にASを挿入します。以下はAS句のないクエリの例です：
+
+''''''''''''
+query = SELECT Animal COUNT(ID)
+        FROM `bigquery-public-data.pet_records.pets`
+        ORDER BY Animal
+''''''''''''
+
+ASを使用すると・・・
+
+''''''''''''
+query = SELECT Animal COUNT(ID) AS Number
+        FROM `bigquery-public-data.pet_records.pets`
+        ORDER BY Animal
+''''''''''''
+
+これらのクエリは同じ情報を返しますが、
+2番目のクエリでは、COUNT()関数によって返されるカラムは、デフォルト名のf0__ではなく、Numberと呼ばれます。
+
+●WITH ... AS
+
+AS単体では、クエリから返されるデータをきれいにする便利な方法です。
+WITHと組み合わせて「共通テーブル式」と呼ばれるものにすると、さらに強力になります。
+
+共通テーブル式（またはCTE）とは、クエリ内で返す一時テーブルのことです。
+CTEはクエリを読みやすい塊に分割するのに役立ち、それに対してクエリを書くことができます。
+
+例えば、pets テーブルを使用して、特に年齢の高い動物について質問したいとします。
+そこで、まずこのように 5 歳以上の動物に関する情報のみを含む CTE を作成します：
+
+''''''''''''
+query = """
+        WITH Seniors AS
+        (
+        SELECT ID, Name
+        FROM `bigquery-public-data.pet_records.pets`
+        WHERE Years_old > 5
+        )
+        XXXXXXX This Query is incomplete. XXXXXXX
+''''''''''''
+
+この不完全なクエリでは何も返されませんが、CTEが作成され、残りのクエリを書いている間に（シニアとして）参照することができます。
+
+CTEから必要な情報を取り出すことで、クエリを完成させることができます。以下の完全なクエリでは、まず CTE を作成し、そこからすべての ID を返します。
+
+''''''''''''
+query = """
+        WITH Seniors AS
+        (
+        SELECT ID, Name
+        FROM `bigquery-public-data.pet_records.pets`
+        WHERE Years_old > 5
+        )
+        SELECT ID
+        FROM Seniors
+''''''''''''
+
+CTEを使用しないことも可能ですが、これが非常に長いクエリの最初の部分であった場合、CTEを削除するとクエリを追うのが非常に難しくなります。
+
+また、CTEは作成したクエリ内でのみ存在し、それ以降のクエリで参照することはできないという点にも注意が必要です。
+つまり、CTEを使用するクエリは常に2つの部分に分けられます。(1) まずCTEを作成し、次に(2) CTEを使用するクエリを記述します。
+
+●Example: How many Bitcoin transactions are made per month?
+
+CTE を使用して、ビットコイン取引データセットの全タイムスパンで、毎日何件のビットコイン取引が行われたかを調べます。
+
+トランザクションテーブルを調査する。以下は最初の数行のビューである。
+
+In[1]:
+from google.cloud import bigquery
+
+# Create a "Client" object
+client = bigquery.Client()
+
+# Construct a reference to the "crypto_bitcoin" dataset
+dataset_ref = client.dataset("crypto_bitcoin", project="bigquery-public-data")
+
+# API request - fetch the dataset
+dataset = client.get_dataset(dataset_ref)
+
+# Construct a reference to the "transactions" table
+table_ref = dataset_ref.table("transactions")
+
+# API request - fetch the table
+table = client.get_table(table_ref)
+
+# Preview the first five lines of the "transactions" table
+client.list_rows(table, max_results=5).to_dataframe()
+
+
+block_timestamp列には各トランザクションの日付がDATETIME形式で格納されているため、DATE()コマンドを使用してこれをDATE形式に変換します。
+
+CTEを使用してこれを行い、クエリの次の部分で各日付のトランザクション数をカウントし、より早い日付が最初に表示されるようにテーブルをソートします
+
+
+
+
+
+
+
+
 
